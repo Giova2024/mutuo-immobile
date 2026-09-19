@@ -28,25 +28,73 @@ function App() {
     propertyPrice > 0 ? Math.round((downPayment / propertyPrice) * 100) : 0
 
   const loanToValueWarning = downPaymentPct < 20
+  const generatedOn = useMemo(
+    () => new Date().toLocaleDateString('it-IT', { dateStyle: 'long' }),
+    [],
+  )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-orange-50 py-8 px-4 text-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-orange-50 py-8 px-4 text-slate-800 print:bg-white print:py-0">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-8 text-center">
-          <p className="mb-2 inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium tracking-wide text-indigo-600 uppercase">
-            Calcolatore mutuo
-          </p>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+        <header className="mb-8 text-center print:mb-4">
+          <div className="mb-2 flex items-center justify-center gap-3 print:hidden">
+            <p className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium tracking-wide text-indigo-600 uppercase">
+              Calcolatore mutuo
+            </p>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm transition hover:border-indigo-300 hover:text-indigo-600"
+            >
+              <PrinterIcon />
+              Stampa / Esporta PDF
+            </button>
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl print:text-2xl">
             Calcola la rata del tuo mutuo casa
           </h1>
-          <p className="mx-auto mt-2 max-w-xl text-slate-500">
+          <p className="mx-auto mt-2 max-w-xl text-slate-500 print:hidden">
             Stima rata mensile, interessi totali e piano di ammortamento per
             l'acquisto della tua abitazione.
           </p>
+          <p className="hidden text-xs text-slate-400 print:mt-1 print:block">
+            Simulazione generata il {generatedOn}
+          </p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-5">
-          <section className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="hidden grid-cols-3 gap-x-8 gap-y-1 border-b border-slate-200 pb-4 mb-4 text-sm print:grid">
+          <p>
+            <span className="font-medium text-slate-600">
+              Prezzo immobile:
+            </span>{' '}
+            {formatCurrency(propertyPrice)}
+          </p>
+          <p>
+            <span className="font-medium text-slate-600">
+              Acconto / anticipo:
+            </span>{' '}
+            {formatCurrency(downPayment)} ({downPaymentPct}%)
+          </p>
+          <p>
+            <span className="font-medium text-slate-600">
+              Importo mutuo:
+            </span>{' '}
+            {formatCurrency(result.loanAmount)}
+          </p>
+          <p>
+            <span className="font-medium text-slate-600">
+              Tasso d'interesse annuo:
+            </span>{' '}
+            {annualRatePct.toFixed(2)}%
+          </p>
+          <p>
+            <span className="font-medium text-slate-600">Durata:</span>{' '}
+            {years} anni
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-5 print:block">
+          <section className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:hidden">
             <h2 className="mb-5 text-lg font-semibold text-slate-800">
               Dati del mutuo
             </h2>
@@ -107,12 +155,12 @@ function App() {
             </div>
           </section>
 
-          <section className="lg:col-span-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-5 text-lg font-semibold text-slate-800">
+          <section className="lg:col-span-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:border-0 print:p-0 print:shadow-none">
+            <h2 className="mb-5 text-lg font-semibold text-slate-800 print:hidden">
               Risultato
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3 print:grid-cols-3 print:break-inside-avoid">
               <ResultCard
                 label="Rata mensile"
                 value={formatCurrencyPrecise(result.monthlyPayment)}
@@ -130,7 +178,7 @@ function App() {
               />
             </div>
 
-            <div className="mt-6 flex justify-center rounded-xl border border-slate-100 bg-slate-50/50 py-6">
+            <div className="mt-6 flex justify-center rounded-xl border border-slate-100 bg-slate-50/50 py-6 print:break-inside-avoid print:border print:py-4">
               <DonutChart
                 capital={result.loanAmount}
                 interest={result.totalInterest}
@@ -139,14 +187,14 @@ function App() {
           </section>
         </div>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:mt-4 print:border-0 print:p-0 print:shadow-none">
           <AmortizationTable
             monthly={result.schedule}
             yearly={result.yearlySchedule}
           />
         </section>
 
-        <footer className="mt-8 text-center text-xs text-slate-400">
+        <footer className="mt-8 text-center text-xs text-slate-400 print:mt-4">
           I valori calcolati sono indicativi e non costituiscono un'offerta
           vincolante. Rivolgiti alla tua banca per una simulazione ufficiale.
         </footer>
@@ -224,6 +272,26 @@ function ResultCard({ label, value, accent }: ResultCardProps) {
       </p>
       <p className="mt-1 text-xl font-bold break-words">{value}</p>
     </div>
+  )
+}
+
+function PrinterIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </svg>
   )
 }
 
