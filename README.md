@@ -19,6 +19,8 @@ npm install
 npm run dev
 ```
 
+Su Windows si può anche fare doppio clic su `Avvia Mutuo.bat`: installa le dipendenze se mancano, avvia il server e apre il browser. Il pulsante **Chiudi applicazione** (visibile solo in sviluppo) spegne il server.
+
 ## Build di produzione
 
 ```bash

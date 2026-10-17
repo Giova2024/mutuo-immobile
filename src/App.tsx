@@ -28,10 +28,38 @@ function App() {
     propertyPrice > 0 ? Math.round((downPayment / propertyPrice) * 100) : 0
 
   const loanToValueWarning = downPaymentPct < 20
+  const [closed, setClosed] = useState(false)
+
+  async function shutdown() {
+    if (!window.confirm("Chiudere l'applicazione e spegnere il server?")) return
+    try {
+      await fetch('/__shutdown', { method: 'POST' })
+    } catch {
+      // il server potrebbe già essere spento
+    }
+    setClosed(true)
+    window.close()
+  }
+
   const generatedOn = useMemo(
     () => new Date().toLocaleDateString('it-IT', { dateStyle: 'long' }),
     [],
   )
+
+  if (closed) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 text-center text-slate-600">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-800">
+            Applicazione chiusa
+          </h1>
+          <p className="mt-2 text-sm">
+            Il server è stato spento. Ora puoi chiudere questa scheda.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-orange-50 py-8 px-4 text-slate-800 print:bg-white print:py-0">
@@ -49,6 +77,16 @@ function App() {
               <PrinterIcon />
               Stampa / Esporta PDF
             </button>
+            {import.meta.env.DEV && (
+              <button
+                type="button"
+                onClick={shutdown}
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm transition hover:border-red-300 hover:text-red-600"
+              >
+                <PowerIcon />
+                Chiudi applicazione
+              </button>
+            )}
           </div>
           <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl print:text-2xl">
             Calcola la rata del tuo mutuo casa
@@ -291,6 +329,25 @@ function PrinterIcon() {
       <polyline points="6 9 6 2 18 2 18 9" />
       <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
       <rect x="6" y="14" width="12" height="8" />
+    </svg>
+  )
+}
+
+function PowerIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+      <line x1="12" y1="2" x2="12" y2="12" />
     </svg>
   )
 }
