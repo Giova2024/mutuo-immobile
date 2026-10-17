@@ -26,5 +26,7 @@ function shutdownEndpoint(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Su GitHub Pages il sito è servito da /mutuo-immobile/ invece che dalla radice
+  base: process.env.GITHUB_PAGES ? '/mutuo-immobile/' : '/',
   plugins: [react(), tailwindcss(), shutdownEndpoint()],
 })
